@@ -48,7 +48,7 @@ class Spot:
         return self.color==TURQUOISE
     
     def reset(self):
-        self.color== WHITE
+        self.color= WHITE
     
     def make_start(self):
         self.color= ORANGE
@@ -72,8 +72,19 @@ class Spot:
         pygame.draw.rect(win, self.color,(self.x ,self.y ,self.width, self.width))
 
     def upadate_neighbour(self,grid):
-        pass
+        self.neighbors=[]
+        if self.row < self.total_rows-1 and not grid[self.row + 1][self.col].isbarrier() : #DOWN
+            self.neighbors.append(grid[self.row+1][self.col])
 
+        if self.row >0 and not grid[self.row - 1 ][self.col].isbarrier() : #UP
+            self.neighbors.append(grid[self.row-1][self.col])
+
+        if self.col < self.total_rows-1 and not grid[self.row][self.col+1].isbarrier() : #right
+            self.neighbors.append(grid[self.row][self.col+1])
+
+        if self.col > 0 and not grid[self.row][self.col-1].isbarrier() : #left
+            self.neighbors.append(grid[self.row+1][self.col-1])
+        
     def __lt__(self,other):
         return False
     
@@ -84,6 +95,14 @@ def h(p1,p2):
     x2,y2=p2
     return abs( x1 - x2)+abs( y1 - y2)
 
+
+def algorithm(draw ,grid, start,end):
+    count=0
+    open_set=PriorityQueue()
+    open_set.put((0,count,start))
+    came_from={}
+    g_score ={spot:float("inf") for row in grid for spot in row}
+    
 
 def make_grid(rows,width):
     grid =[]
@@ -105,14 +124,14 @@ def draw_grid(win ,rows, width):
         for j in range(rows):
                 pygame.draw.line(win, GREY, (j*gap,0) ,(j*gap , width))
                 
-def draw(win, grid ,rows, width):
+def draw(win, grid ,ROWS, width):
     win.fill(WHITE)
 
     for row in grid:
         for spot in row :
             spot.draw(win)
 
-    draw_grid(win, rows,width)
+    draw_grid(win, ROWS,width)
     pygame.display.update()
 
 
@@ -167,6 +186,14 @@ def main(win, width):
                     start=None
                 elif spot ==end:
                     end=None
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE and not started:
+                    for row in grid:
+                        for spot in row:
+                            spot.upadate_neighbour()
+                    algorithm(lambda : draw(win, grid ,ROWS, width) , grid, start, end)
+                    x=lambda : print("hello")
     pygame.quit()
 
 main(WIN,WIDTH)
